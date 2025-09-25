@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <h2>Вход на сайт</h2>
+        <form>
+            {% csrf_token %}
+            {{ form }}
+            <button type="submit">Войти</button>
+        </form>
+    </div>
+    <div class="col-md-8">
+    </div>
+</div>
+
+{% endblock %}
