@@ -1,6 +1,6 @@
 from django import forms
 
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 
 class LoginForm(forms.Form):
     username = forms.CharField()
@@ -31,3 +31,26 @@ class LoginForm(forms.Form):
     def get_user(self):
         return self.user
 
+
+class RegisterForm(forms.Form):
+    username = forms.CharField(label='логин')
+    password1 = forms.CharField(widget=forms.PasswordInput(), label='пароль')
+    password2 = forms.CharField(widget=forms.PasswordInput(), label='повторите пароль')
+
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+
+        User = get_user_model()
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError('такой логин уже есть')
+        return username
+
+    def clean(self):
+        password1 = self.cleaned_data['password1']
+        password2 = self.cleaned_data['password2']
+
+        if password1 != password2:
+            raise forms.ValidationError('пароли не совпадают')
+
+        return self.cleaned_data
