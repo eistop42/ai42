@@ -1,9 +1,13 @@
 from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class Prompt(models.Model):
     name = models.CharField(max_length=255, verbose_name='название промпта')
     text = models.TextField(verbose_name='описание промпта')
     created_at = models.DateTimeField(auto_now=True, verbose_name='дата создания')
+    user = models.ForeignKey(User, verbose_name='пользователь', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Промпт'

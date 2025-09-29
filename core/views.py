@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.files.base import ContentFile
 import uuid
@@ -9,10 +11,19 @@ from .gen_image import generate_image
 def main(request):
     """Главная страница"""
 
-    prompts = Prompt.objects.all()
+    prompts = Prompt.objects.all().order_by('-created_at')
 
     context = {'prompts': prompts}
     return render(request, 'main.html', context)
+
+@login_required
+def my_prompts(request):
+    user = request.user
+
+    prompts = Prompt.objects.filter(user=user).order_by('-created_at')
+
+    context = {'prompts': prompts}
+    return render(request, 'my_prompts.html', context)
 
 
 def prompt_detail(request, prompt_id):
@@ -29,8 +40,9 @@ def prompt_detail(request, prompt_id):
 def add_prompt(request):
 
     form = AddPrompt()
+    user = request.user
 
-    if request.method == 'POST':
+    if request.method == 'POST' and user.is_authenticated:
         # передали данные в форму
         form = AddPrompt(request.POST)
 
@@ -41,7 +53,7 @@ def add_prompt(request):
             text = form.cleaned_data['text']
 
             # создали объект в бд
-            Prompt.objects.create(name=name, text=text)
+            Prompt.objects.create(name=name, text=text, user=user)
 
             # перенаправляем на главную, если все ок 😎
             return redirect('/')

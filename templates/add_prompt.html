@@ -6,13 +6,16 @@
 <div class="row">
     <div class="col-4">
         <h2>Добавление промпта</h2>
+
+        {% if request.user.is_authenticated %}
         <form method="post">
             {% csrf_token %}
             {{ form|crispy }}
-
             <button class="btn btn-primary" type="submit">Добавить</button>
-
         </form>
+        {% else %}
+        <p>Чтобы добавять промпты - <a href="{% url 'login' %}">войдите на сайт</a> </p>
+        {% endif %}
     </div>
 </div>
 

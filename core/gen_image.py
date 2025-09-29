@@ -1,10 +1,12 @@
 import uuid
 from yandex_cloud_ml_sdk import YCloudML
 
+from creds import YANDEX_TOKEN, YANDEX_FOLDER
+
 def generate_image(message):
     sdk = YCloudML(
-        folder_id="",
-        auth="",
+        folder_id=YANDEX_FOLDER,
+        auth=YANDEX_TOKEN,
     )
 
     model = sdk.models.image_generation("yandex-art")
