@@ -1,11 +1,11 @@
 from django.contrib.auth.decorators import login_required
-
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.files.base import ContentFile
 import uuid
 
-from .models import Prompt, PromptImage
-from .forms import AddPrompt
+from .models import Prompt, PromptImage, PromptComment
+from .forms import AddPrompt, AddComment
 from .gen_image import generate_image
 
 def main(request):
@@ -30,11 +30,31 @@ def prompt_detail(request, prompt_id):
     """Отдельная странциа каждого промпта"""
     prompt = get_object_or_404(Prompt, id=prompt_id)
 
-    # получаем картинки этого промпта
-    images = PromptImage.objects.filter(prompt__id=prompt_id).order_by('-created_date')
+    add_comment = AddComment()
 
-    context = {'prompt': prompt, 'images': images}
+    # получаем картинки и комментарии этого промпта
+    images = PromptImage.objects.filter(prompt__id=prompt_id).order_by('-created_date')
+    comments = PromptComment.objects.filter(prompt__id=prompt_id).order_by('-created_at')
+
+    context = {
+        'prompt': prompt,
+        'images': images,
+        'comments': comments,
+        'add_comment': add_comment
+    }
     return render(request, 'prompt_detail.html', context)
+
+
+@require_POST
+@login_required
+def delete_prompt(request, prompt_id):
+    # проверить, что промпт принадлежит текущему пользователю
+    user = request.user
+    prompt = get_object_or_404(Prompt, id=prompt_id)
+
+    if prompt.user == user:
+        prompt.delete()
+        return redirect('my_prompts')
 
 
 def add_prompt(request):
@@ -79,4 +99,3 @@ def generate_image_view(request, prompt_id):
     prompt_image.save()
     # 5. Перенаправить на страницу текущего промпта
     return redirect('prompt_detail', prompt.id)
-

@@ -16,6 +16,19 @@ class Prompt(models.Model):
     def __str__(self):
         return self.name
 
+class PromptComment(models.Model):
+    text = models.CharField(max_length=500, verbose_name='текст')
+    created_at = models.DateTimeField(auto_now=True, verbose_name='дата создания')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='пользователь')
+    prompt = models.ForeignKey(Prompt, on_delete=models.CASCADE, verbose_name='промпт')
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.text[:15]
+
 
 class PromptImage(models.Model):
     prompt = models.ForeignKey(Prompt, on_delete=models.CASCADE, verbose_name='промпт')

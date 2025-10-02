@@ -1,7 +1,7 @@
 import uuid
 from yandex_cloud_ml_sdk import YCloudML
 
-from creds import YANDEX_TOKEN, YANDEX_FOLDER
+from .creds import YANDEX_TOKEN, YANDEX_FOLDER
 
 def generate_image(message):
     sdk = YCloudML(

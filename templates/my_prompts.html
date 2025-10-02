@@ -10,6 +10,10 @@
             <p>{{ prompt.text }}</p>
             <p>Пользователь: {{ prompt.user }}</p>
             <a class="btn btn-primary" href="{% url 'prompt_detail' prompt.id %}" role="button">Посмотреть</a>
+            <form method="post" class="mt-2" action="{% url 'delete_prompt' prompt.id %}">
+                {% csrf_token %}
+                <button class="btn btn-danger">Удалить</button>
+            </form>
         </div>
         {% endfor %}
     </div>

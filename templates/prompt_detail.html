@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
 {% block content %}
 
 <div class="row mt-5">
@@ -8,11 +9,25 @@
         <h3>{{ prompt.name }}</h3>
         <b>Описание</b>
         <p> {{ prompt.text }}</p>
-         <a class="btn btn-primary" href="{% url 'generate_image' prompt.id %}" role="button">Сгенерировать картинку</a>
+        <a class="btn btn-primary" href="{% url 'generate_image' prompt.id %}" role="button">Сгенерировать картинку</a>
+        <div class="mt-4">
+            <h4>Комментарии</h4>
+            <form class="mb-3">
+                {% csrf_token %}
+                {{ add_comment|crispy }}
+                <button class="btn btn-primary">Добавить</button>
+            </form>
+            {% for comment in comments %}
+            <div class="mb-2">
+                <div class="mb-2"><b>{{ comment.text }}</b></div>
+                {{ comment.user }} {{ comment.created_at|date:'d.m.Y' }}<br>
+            </div>
+            {% endfor %}
+        </div>
     </div>
     <div class="col-md-8">
         {% for image in images %}
-        <a href="{{ image.image.url }}" target="_blank"><img src="{{ image.image.url }}" width="150" ></a>
+        <a href="{{ image.image.url }}" target="_blank"><img src="{{ image.image.url }}" width="150"></a>
         {% endfor %}
     </div>
 </div>
