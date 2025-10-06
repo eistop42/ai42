@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.files.base import ContentFile
+from django.http import HttpResponse
 import uuid
 
 from .models import Prompt, PromptImage, PromptComment
@@ -89,7 +90,8 @@ def generate_image_view(request, prompt_id):
     # 1. Получить текст текущего промпта
     prompt = get_object_or_404(Prompt, id=prompt_id)
     # 2. Сходить в яндекс, получить картинку
-    image = generate_image(prompt.text)
+    addition = request.POST.get('addition')
+    image = generate_image(prompt.text + addition)
     # 3. Сохранить картинку в prompts
     image_file = ContentFile(image)
     # 4. Создать объект PromptImage
@@ -99,3 +101,36 @@ def generate_image_view(request, prompt_id):
     prompt_image.save()
     # 5. Перенаправить на страницу текущего промпта
     return redirect('prompt_detail', prompt.id)
+
+@require_POST
+@login_required
+def add_comment(request, prompt_id):
+
+    # передали данные в форму
+    form = AddComment(request.POST)
+    prompt = get_object_or_404(Prompt, id=prompt_id)
+
+    # проверили на валидность
+    if form.is_valid():
+        text = form.cleaned_data.get('text')
+
+        # достать пользователя и промпт
+        user = request.user
+        prompt = get_object_or_404(Prompt, id=prompt_id)
+
+        # создать комментарий
+
+        PromptComment.objects.create(text=text, user=user, prompt=prompt)
+        return redirect('prompt_detail', prompt_id)
+
+    # получаем картинки и комментарии этого промпта
+    images = PromptImage.objects.filter(prompt__id=prompt_id).order_by('-created_date')
+    comments = PromptComment.objects.filter(prompt__id=prompt_id).order_by('-created_at')
+
+    context = {
+        'prompt': prompt,
+        'images': images,
+        'comments': comments,
+        'add_comment': form
+    }
+    return render(request, 'prompt_detail.html', context)

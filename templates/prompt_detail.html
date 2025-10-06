@@ -9,10 +9,15 @@
         <h3>{{ prompt.name }}</h3>
         <b>Описание</b>
         <p> {{ prompt.text }}</p>
-        <a class="btn btn-primary" href="{% url 'generate_image' prompt.id %}" role="button">Сгенерировать картинку</a>
+        <form action="{% url 'generate_image' prompt.id %}" method="post">
+            {% csrf_token %}
+            <label class="form-label">Дополнения</label>
+            <input class="textInput form-control mb-3" required name="addition">
+            <button class="btn btn-primary">Сгенерировать картинку</button>
+        </form>
         <div class="mt-4">
             <h4>Комментарии</h4>
-            <form class="mb-3">
+            <form class="mb-3" method="post" action="{% url 'add_comment' prompt.id %}">
                 {% csrf_token %}
                 {{ add_comment|crispy }}
                 <button class="btn btn-primary">Добавить</button>
@@ -20,7 +25,7 @@
             {% for comment in comments %}
             <div class="mb-2">
                 <div class="mb-2"><b>{{ comment.text }}</b></div>
-                {{ comment.user }} {{ comment.created_at|date:'d.m.Y' }}<br>
+                {{ comment.user }} {{ comment.created_at|date:'d.m.Y H:i:s' }}<br>
             </div>
             {% endfor %}
         </div>

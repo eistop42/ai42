@@ -9,3 +9,9 @@ class AddPrompt(forms.Form):
 class AddComment(forms.Form):
     text = forms.CharField(max_length=500, label='текст комментария')
 
+    def clean_text(self):
+        text = self.cleaned_data.get('text')
+        if 'дурак' in text:
+            raise forms.ValidationError('Некорректный комментарий')
+        return text
+
