@@ -16,6 +16,13 @@ class Prompt(models.Model):
     def __str__(self):
         return self.name
 
+    def likes_count(self):
+        count = PromptLike.objects.filter(prompt__id=self.id).count()
+        return count
+
+    def get_hello(self):
+        return 'Привет'
+
 class PromptComment(models.Model):
     text = models.CharField(max_length=500, verbose_name='текст')
     created_at = models.DateTimeField(auto_now=True, verbose_name='дата создания')
@@ -40,3 +47,16 @@ class PromptImage(models.Model):
 
     def __str__(self):
         return self.prompt.name
+
+
+class PromptLike(models.Model):
+    user = models.ForeignKey(User, verbose_name='пользователь', on_delete=models.CASCADE)
+    prompt = models.ForeignKey(Prompt, verbose_name='промпт', on_delete=models.CASCADE)
+    created_date = models.DateTimeField(verbose_name='дата', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Лайк'
+        verbose_name_plural = 'Лайки'
+
+    def __str__(self):
+        return self.prompt.name + ' ' + self.user.username

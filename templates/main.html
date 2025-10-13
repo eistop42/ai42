@@ -4,11 +4,25 @@
 <h2>Список промптов</h2>
 <div class="row mt-5">
     <div class="col-md-4">
+        <div>
+            <form>
+                <label>Сортировка</label>
+                <select name="sort">
+                    <option value="date">По дате</option>
+                    <option value="like">По лайкам</option>
+                    <option value="name">По названию</option>
+                </select>
+                <button class="btn btn-link">Применить</button>
+            </form>
+        </div>
         {% for prompt in prompts %}
         <div class="mb-4">
             <h3>{{ prompt.name }}</h3>
             <p>{{ prompt.text }}</p>
+            <p>Лайки: {{ prompt.likes_count }}</p>
+            <p>Лайки (2): {{ prompt.promptlike_set.count }}</p>
             <p>Пользователь: {{ prompt.user }}</p>
+            <p>{{ prompt.get_hello }}</p>
             <a class="btn btn-primary" href="{% url 'prompt_detail' prompt.id %}" role="button">Посмотреть</a>
         </div>
         {% endfor %}

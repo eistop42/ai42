@@ -5,3 +5,4 @@ from .models import *
 admin.site.register(Prompt)
 admin.site.register(PromptImage)
 admin.site.register(PromptComment)
+admin.site.register(PromptLike)

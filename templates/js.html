@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Тренировка js</h1>
+<p id="myText">Пример текста</p>
+<button onclick="show_alert()" id="testButton">Тестовая кнопка</button>
+<form id="TextForm" method="post">
+    {% csrf_token %}
+    <label>Текст</label>
+    <input name="text">
+    <button id="sendTextButton" onclick="show_alert()" type="submit">Отправить</button>
+</form>
+
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

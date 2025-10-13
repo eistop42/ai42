@@ -9,11 +9,26 @@
         <h3>{{ prompt.name }}</h3>
         <b>Описание</b>
         <p> {{ prompt.text }}</p>
-        <form action="{% url 'generate_image' prompt.id %}" method="post">
+        <p>Лайки: {{ likes_count }}</p>
+        <p>Лайки (2): {{ prompt.promptlike_set.all }}</p>
+        {% if request.user.is_authenticated %}
+            <form action="{% url 'like_prompt' prompt.id %}" method="post">
+                {% csrf_token %}
+                {% if not is_liked %}
+                    <button class="btn btn-light">Лайк</button>
+                {% else %}
+                    <button class="btn btn-light">Снять лайк</button>
+                {% endif %}
+            </form>
+        {% else %}
+                <p>Войди на сайт, чтобы лайкать</p>
+        {% endif %}
+
+        <form id="genImage" action="{% url 'generate_image' prompt.id %}" method="post">
             {% csrf_token %}
             <label class="form-label">Дополнения</label>
             <input class="textInput form-control mb-3" required name="addition">
-            <button class="btn btn-primary">Сгенерировать картинку</button>
+            <button id="genImageButton" class="btn btn-primary">Сгенерировать картинку</button>
         </form>
         <div class="mt-4">
             <h4>Комментарии</h4>

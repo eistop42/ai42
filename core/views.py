@@ -1,11 +1,13 @@
+import time
+import uuid
+
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.files.base import ContentFile
-from django.http import HttpResponse
-import uuid
+from django.db.models import Count
 
-from .models import Prompt, PromptImage, PromptComment
+from .models import Prompt, PromptImage, PromptComment, PromptLike
 from .forms import AddPrompt, AddComment
 from .gen_image import generate_image
 
@@ -13,6 +15,15 @@ def main(request):
     """Главная страница"""
 
     prompts = Prompt.objects.all().order_by('-created_at')
+
+    sort_way = request.GET.get('sort')
+    if sort_way:
+        if sort_way == 'name':
+            prompts = prompts.order_by('name')
+        elif sort_way == 'date':
+            prompts = prompts.order_by('-created_at')
+        elif sort_way == 'like':
+            prompts = Prompt.objects.annotate(num_likes=Count('promptlike')).order_by('-num_likes')
 
     context = {'prompts': prompts}
     return render(request, 'main.html', context)
@@ -29,6 +40,7 @@ def my_prompts(request):
 
 def prompt_detail(request, prompt_id):
     """Отдельная странциа каждого промпта"""
+
     prompt = get_object_or_404(Prompt, id=prompt_id)
 
     add_comment = AddComment()
@@ -36,12 +48,22 @@ def prompt_detail(request, prompt_id):
     # получаем картинки и комментарии этого промпта
     images = PromptImage.objects.filter(prompt__id=prompt_id).order_by('-created_date')
     comments = PromptComment.objects.filter(prompt__id=prompt_id).order_by('-created_at')
+    likes_count = PromptLike.objects.filter(prompt__id=prompt_id).count()
+
+    user = request.user
+
+    if user.is_authenticated:
+        is_liked = PromptLike.objects.filter(prompt=prompt, user=user).exists()
+    else:
+        is_liked = None
 
     context = {
         'prompt': prompt,
         'images': images,
         'comments': comments,
-        'add_comment': add_comment
+        'add_comment': add_comment,
+        'likes_count': likes_count,
+        'is_liked': is_liked
     }
     return render(request, 'prompt_detail.html', context)
 
@@ -83,6 +105,22 @@ def add_prompt(request):
     context = {'form': form}
 
     return render(request, 'add_prompt.html', context)
+
+
+@login_required
+def like_prompt(request, prompt_id):
+    prompt = get_object_or_404(Prompt, id=prompt_id)
+    user = request.user
+
+    is_liked = PromptLike.objects.filter(user=user, prompt=prompt).exists()
+
+    if is_liked:
+        PromptLike.objects.filter(user=user, prompt=prompt).delete()
+    else:
+        PromptLike.objects.create(prompt=prompt, user=user)
+
+    return redirect('prompt_detail', prompt_id)
+
 
 
 def generate_image_view(request, prompt_id):
@@ -134,3 +172,10 @@ def add_comment(request, prompt_id):
         'add_comment': form
     }
     return render(request, 'prompt_detail.html', context)
+
+def js(request):
+
+    if request.method == 'POST':
+        time.sleep(2)
+        return redirect('/js')
+    return render(request, 'js.html')
